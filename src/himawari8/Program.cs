@@ -1,8 +1,10 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace himawari8
 {
@@ -30,7 +32,10 @@ namespace himawari8
             image.Save(temporaryPath);
             image.Dispose();
 
-            Wallpaper.Set(temporaryPath, WallpaperStyle.Centered);
+            if (image.SucceededDownloading)
+            {
+                Wallpaper.Set(temporaryPath, WallpaperStyle.Centered);
+            }
         }
 
         private static void SetRunAtWindowsStartup()

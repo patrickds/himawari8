@@ -7,6 +7,7 @@ using System.Net;
 
 namespace himawari8
 {
+    //http://himawari8.nict.go.jp/himawari8-image.htm
     internal class Himawari8Image
     {
         private const string HIMAWARI8_URL = @"http://himawari8-dl.nict.go.jp/himawari8/img/D531106";
@@ -20,11 +21,12 @@ namespace himawari8
         private Bitmap _bitmap;
         private Graphics _graphics;
         private string _baseUrl;
-        private bool success = true;
+
+        public bool SucceededDownloading { get; set; } = true;
 
         public Himawari8Image()
         {
-            _time = Himawari8UpdateInterval.GetLasHimawari8UpdateTime();
+            _time = Himawari8UpdateInterval.GetSynchronizedSunLightTime();
             BuildBaseUrl();
             CreateImage();
         }
@@ -36,7 +38,7 @@ namespace himawari8
             var day = _time.ToString("dd");
             var time = _time.ToString("HHmmss");
 
-            _baseUrl = string.Concat( HIMAWARI8_URL, "/", LEVEL, "/", BLOCK_SIZE,"/", year,"/", month, "/", day, "/", time);
+            _baseUrl = string.Concat(HIMAWARI8_URL, "/", LEVEL, "/", BLOCK_SIZE, "/", year, "/", month, "/", day, "/", time);
         }
 
         private void CreateImage()
@@ -63,30 +65,29 @@ namespace himawari8
 
         private Image DownloadImageBlock(int i, int j)
         {
-            var currentUrl = string.Concat( _baseUrl, BLOCK_SEPARATOR, i, BLOCK_SEPARATOR, j, URL_IMAGE_EXTENSION);
+            var currentUrl = string.Concat(_baseUrl, BLOCK_SEPARATOR, i, BLOCK_SEPARATOR, j, URL_IMAGE_EXTENSION);
 
             try
             {
                 var request = WebRequest.Create(currentUrl);
-                using (var response = request.GetResponse())
-                {
-                    Console.WriteLine("Downloading " + currentUrl);
-                    return Image.FromStream(response.GetResponseStream());
-                }
+                var response = request.GetResponse();
+                var blockImage = Image.FromStream(response.GetResponseStream());
+                response.Dispose();
+                Console.WriteLine(currentUrl);
+                return blockImage;
             }
             catch (Exception)
             {
-                Console.WriteLine("\nFailed downloading " + currentUrl);
-                success = false;
+                SucceededDownloading = false;
                 return new Bitmap(BLOCK_SIZE, BLOCK_SIZE);
             }
         }
 
         public void Save(string filename)
         {
-            if (!success)
+            if (!SucceededDownloading)
                 return;
-            
+
             var directory = Path.GetDirectoryName(filename);
 
             if (!Directory.Exists(directory))

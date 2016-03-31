@@ -1,40 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using himawari8.Extensions;
 
 namespace himawari8
 {
     internal static class Himawari8UpdateInterval
     {
-        private static DateTime GetJapanDateTimeNow()
-        {
-            var timeSpan = new TimeSpan(-2, -30, 0);
-            var nowInJapan = DateTime.Now + timeSpan;
-
-            return nowInJapan;
-        }
-
-        private static DateTime NormalizeMinutes(DateTime nowInJapan)
-        {
-            var minutesSinceLastUpdate = nowInJapan.Minute % 10;
-            return nowInJapan.AddMinutes(-minutesSinceLastUpdate);
-        }
-
-        private static DateTime NormalizeSeconds(DateTime nowInJapan)
-        {
-            var secondsSinceLastUpdate = nowInJapan.Second;
-            return nowInJapan.AddSeconds(-secondsSinceLastUpdate);
-        }
-
         public static DateTime GetLasHimawari8UpdateTime()
         {
-            var nowInJapan = GetJapanDateTimeNow();
-            var nowInJapanNormlizedMinutes = NormalizeMinutes(nowInJapan);
-            var lastHimawariUpdate = NormalizeSeconds(nowInJapanNormlizedMinutes);
+            var timeSpan = new TimeSpan(01, 40, 00);
+            var nowInJapan = DateTime.Now + timeSpan;
 
-            return lastHimawariUpdate;
+            return nowInJapan
+                .NormalizeMinutesAccordingToHimawari8UpdateCycle()
+                .NormalizeSecondsAccordingToHimawari8UpdateCycle();
+        }
+
+        public static DateTime GetSynchronizedSunLightTime()
+        {
+            var timeSpan = new TimeSpan(09, 00, 00);
+            var synchronizedSunLightDate = DateTime.Now - timeSpan;
+
+            return synchronizedSunLightDate
+                .NormalizeMinutesAccordingToHimawari8UpdateCycle()
+                .NormalizeSecondsAccordingToHimawari8UpdateCycle();
+        }
+
+        public static DateTime GetLastDayHimawariTime()
+        {
+            var oneDaySpan = new TimeSpan(24, 00, 00);
+            var yesterday = DateTime.Now - oneDaySpan;
+
+            return yesterday
+                .NormalizeMinutesAccordingToHimawari8UpdateCycle()
+                .NormalizeSecondsAccordingToHimawari8UpdateCycle();
         }
     }
 }
