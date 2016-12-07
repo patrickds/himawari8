@@ -1,26 +1,49 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
-using System.Linq;
 
 namespace himawari8
 {
     class Program
     {
+        private static System.Threading.Timer _timer;
         static void Main()
         {
 #if !DEBUG
             SetRunAtWindowsStartup();
 #endif
-            var tenMinutesInterval = 600000;
-            while (true)
+            UpdateWallpaper();
+            StartTask();
+            IdleLoop();
+        }
+
+        private static void StartTask()
+        {
+            _timer = new System.Threading.Timer(
+                (state) => { UpdateWallpaper(); },
+                null,
+                TimeSpan.Zero,
+                TimeSpan.FromMinutes(10));
+        }
+
+        private static void IdleLoop()
+        {
+            bool createdNew;
+            var waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset, "CF2D4313-33DE-489D-9721-6AFF69841DEA", out createdNew);
+            var signaled = false;
+
+            if (!createdNew)
             {
-                UpdateWallpaper();
-                Thread.Sleep(tenMinutesInterval);
+                waitHandle.Set();
+                return;
             }
+
+            do
+            {
+                signaled = waitHandle.WaitOne(TimeSpan.FromSeconds(5));
+            } while (!signaled);
         }
 
         private static void UpdateWallpaper()
