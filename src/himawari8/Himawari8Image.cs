@@ -8,7 +8,7 @@ namespace himawari8
     //http://himawari8.nict.go.jp/himawari8-image.htm
     internal class Himawari8Image
     {
-        private const string HIMAWARI8_URL = @"http://himawari8-dl.nict.go.jp/himawari8/img/D531106";
+        private const string HIMAWARI8_URL = @"https://himawari8-dl.nict.go.jp/himawari8/img/D531106";
         private const string BLOCK_SEPARATOR = @"_";
         private const string URL_IMAGE_EXTENSION = @".png";
         private const string LEVEL = "4d";
